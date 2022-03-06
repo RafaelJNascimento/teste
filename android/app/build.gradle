@@ -236,3 +236,54 @@ task copyDownloadableDepsToLibs(type: Copy) {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+
+void runBefore(String dependentTaskName, Task task) {
+    Task dependentTask = tasks.findByPath(dependentTaskName);
+    if (dependentTask != null) {
+        dependentTask.dependsOn task
+    }
+}
+
+gradle.projectsEvaluated {
+    // Grab all build types and product flavors
+    def buildTypes = android.buildTypes.collect { type -> type.name }
+    def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
+
+    // When no product flavors defined, use empty
+    if (!productFlavors) productFlavors.add('')
+
+    productFlavors.each { productFlavorName ->
+        buildTypes.each { buildTypeName ->
+            // Create variant and target names
+            def flavorNameCapitalized = "${productFlavorName.capitalize()}"
+            def buildNameCapitalized = "${buildTypeName.capitalize()}"
+            def targetName = "${flavorNameCapitalized}${buildNameCapitalized}"
+            def targetPath = productFlavorName ?
+                    "${productFlavorName}/${buildTypeName}" :
+                    "${buildTypeName}"
+
+            // Bundle task name for variant
+            def cleanJsAndAssetsTaskName = "clean${targetName}JsAndAssets"
+
+            def currentBundleTask = tasks.create(
+                    name: cleanJsAndAssetsTaskName,
+                    type: Exec) {
+                group = "react"
+                description = "clean JS and assets for ${targetName}."
+
+                workingDir "${projectDir}/../.."
+                commandLine "bash","-c","${projectDir}/../../clean.sh"
+            }
+
+            // Hook bundle${productFlavor}${buildType}JsAndAssets into the android build process
+            currentBundleTask.dependsOn("merge${targetName}Assets")
+
+            runBefore("process${flavorNameCapitalized}Armeabi-v7a${buildNameCapitalized}Resources", currentBundleTask)
+            runBefore("process${flavorNameCapitalized}X86${buildNameCapitalized}Resources", currentBundleTask)
+            runBefore("processUniversal${targetName}Resources", currentBundleTask)
+            runBefore("process${targetName}Resources", currentBundleTask)
+            runBefore("dataBindingProcessLayouts${targetName}", currentBundleTask)
+        }
+    }
+}
