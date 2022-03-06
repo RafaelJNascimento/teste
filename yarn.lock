@@ -5482,6 +5482,11 @@ react-native-codegen@^0.0.7:
     jscodeshift "^0.11.0"
     nullthrows "^1.1.1"
 
+react-native-jitsi-meet@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-jitsi-meet/-/react-native-jitsi-meet-2.2.0.tgz#95a7afa8f5bf1ac76304db1a404977113be7307c"
+  integrity sha512-fUsWoaxUgUzctxWwPZGZUXRnhR6vCJLuW6P3n8unOEwNhFFaGMz04M4pzaL2iljFU67W8agjBUBUeE8iL7HO8Q==
+
 react-native@0.65.1:
   version "0.65.1"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.65.1.tgz#bd8cd313e0eb8ddcf08e61e3f8b54b7fc31a418c"

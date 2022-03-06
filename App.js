@@ -1,112 +1,146 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+    View,
+    Text,
+    StatusBar,
+    StyleSheet,
+    SafeAreaView,
+    TextInput,
+    TouchableOpacity,
+    PermissionsAndroid,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import Jitsi from './jitsi';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+const teste = () => {
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+    const [joinMeeting, setJoinMeeting] = useState(false);
+    const [url, setURL] = useState('https://meet.jit.si/rafaelTesteJitsi');
+    const [name, setName] = useState('rafael');
+    const [email, setEmail] = useState('rafael@gmail.com');
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+    const requestPermission = async () => {
+        await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.CAMERA,
+            {
+                title: "App Permissão de Câmera",
+                message: "O App precisa de acesso à câmera.",
+                buttonNeutral: "Pergunte-me depois",
+                buttonNegative: "Cancelar",
+                buttonPositive: "OK"
+            }
+        );
+        await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            {
+                title: "App Permissão de gravar audio",
+                message: "O App precisa de acesso para gravar audio.",
+                buttonNeutral: "Pergunte-me depois",
+                buttonNegative: "Cancelar",
+                buttonPositive: "OK"
+            }
+        );
+        await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            {
+                title: "App Permissão de acesso a arquivos",
+                message: "O App precisa de acesso ao arquivos",
+                buttonNeutral: "Pergunte-me depois",
+                buttonNegative: "Cancelar",
+                buttonPositive: "OK"
+            }
+        );
+    };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+    return (
+        <SafeAreaView
+            style={styles.containe}>
+            <StatusBar
+                animated={true}
+                backgroundColor="#000"
+                barStyle={'light-content'} />
+            <View style={styles.body}>
+                {
+                    joinMeeting
+                        && url.length > 0
+                        && name.length > 0
+                        && email.length > 0 ?
+                        <Jitsi
+                            url={url}
+                            name={name}
+                            email={email}
+                        />
+                        :
+                        <View
+                            style={{
+                                flex: 1,
+                                height: '100%',
+                                width: '100%',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={setURL}
+                                placeholder={'insira a url'}
+                                value={url}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={setName}
+                                placeholder={'insira seu nome'}
+                                value={name}
+                            />
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={setEmail}
+                                placeholder={'insira seu email'}
+                                value={email}
+                            />
+                            <TouchableOpacity
+                                onPress={() => requestPermission()}
+                                style={styles.button}>
+                                <Text>Solicitar Permissões</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => setJoinMeeting(true)}
+                                style={styles.button}>
+                                <Text>Abrir chamada de vídeo</Text>
+                            </TouchableOpacity>
+                        </View>
+                }
+            </View>
+        </SafeAreaView>
+    );
+}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+    containe: {
+        flex: 1,
+    },
+    body: {
+        flex: 1,
+        backgroundColor: '#d3d3d3',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    input: {
+        height: 40,
+        width: 180,
+        borderWidth: 1,
+        padding: 10,
+        margin: 5,
+    },
+    button: {
+        height: 40,
+        width: 180,
+        margin: 5,
+        borderRadius: 8,
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+    }
 });
 
-export default App;
+export default teste;
